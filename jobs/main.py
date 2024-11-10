@@ -2,7 +2,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType, DateType
 from pyspark.sql.functions import udf
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
+from config import configuration
 
 from udf_utils import *
 
@@ -22,9 +23,9 @@ def define_udfs():
 
 if __name__ == "__main__":
     # load ENVIRONMENT VARIABLES
-    load_dotenv()
-    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
-    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+    # load_dotenv()
+    AWS_ACCESS_KEY_ID = configuration.AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY = configuration.AWS_SECRET_ACCESS_KEY
 
     # create SparkSession and Config
     spark = (SparkSession.builder.appName("AWS_Spark_Streaming")
@@ -40,9 +41,9 @@ if __name__ == "__main__":
     )
 
     # Directory to raw data with different types
-    text_dir = 'file:///home/thangquang/Documents/CODE/aws-spark-streaming-project/data/text'
-    csv_dir = 'file:///home/thangquang/Documents/CODE/aws-spark-streaming-project/data/csv'
-    json_dir = 'file:///home/thangquang/Documents/CODE/aws-spark-streaming-project/data/json'
+    text_dir = 'file://data/text'
+    csv_dir = 'file://data/csv'
+    json_dir = 'file://data/json'
 
     # Define Data Schema For Consistency
     data_schema = StructType([
