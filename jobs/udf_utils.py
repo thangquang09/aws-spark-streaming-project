@@ -86,9 +86,4 @@ def extract_company_address(file_content):
         return address.group(1)
     except Exception as e:
         raise ValueError(f"Error extracting address: {e}")
-
-if __name__ == "__main__":
-    with open("data/testdata/11238_NHAN_VIEN_KY_THUAT_DIEN.txt", 'r') as f:
-        content = f.read()
-        # print(content)
-        print(extract_company_address(content))
+        
