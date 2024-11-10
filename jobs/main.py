@@ -32,7 +32,7 @@ if __name__ == "__main__":
     print(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
     # create SparkSession and Config
     spark = (SparkSession.builder.appName("AWS_Spark_Streaming_Project")
-        # .master("spark://spark-master:7077")
+        .master("spark://spark-master:7077")
         .config('spark.jars.packages',
                 'org.apache.hadoop:hadoop-aws:3.3.1,'
                 'com.amazonaws:aws-java-sdk:1.11.469')
