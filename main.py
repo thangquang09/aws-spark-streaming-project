@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StructField, StringType, DoubleType
+from pyspark.sql.types import StructType, StructField, StringType, DoubleType, DateType
 import os
 from dotenv import load_dotenv
 
@@ -19,15 +19,23 @@ if __name__ == "__main__":
                 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider')\
         .getOrCreate()
 
-    text_dir = 'file:///home/thangquang/Documents/CODE/aws-spark-streaming-project/data/text'
+    text_dir = 'file:///home/thangquang/Documents/CODE/aws-spark-streaming-project/data/csv'
     csv_dir = 'file:///home/thangquang/Documents/CODE/aws-spark-streaming-project/data/csv'
 
     data_schema = StructType([
         StructField("job_title", StringType(), True),
-        StructField("salary", StringType(), True),
-        StructField("job_title", StringType(), True),
-        StructField("job_title", StringType(), True),
-        StructField("job_title", StringType(), True),
+        StructField("salary_start", DoubleType(), True),
+        StructField("salary_end", DoubleType(), True),
+        StructField("years_of_experience", DoubleType(), True),
+        StructField("submission_deadline", DateType(), True),
+        StructField("job_description", StringType(), True),
+        StructField("job_requirements", StringType(), True),
+        StructField("benefits", StringType(), True),
+        StructField("company_address", StringType(), True),
     ])
+
     
-        
+
+    
+    
+    
