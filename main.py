@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from udf_utils import *
 
 def define_udfs():
+    # return all udf to extract every single field in the whole text file
     return {
         'extract_job_title_udf': udf(extract_job_title, StringType()),
         'extract_salary_start_udf': udf(extract_salary_start, StringType()),
@@ -20,10 +21,12 @@ def define_udfs():
     }
 
 if __name__ == "__main__":
+    # load ENVIRONMENT VARIABLES
     load_dotenv()
     AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
     AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 
+    # create SparkSession and Config
     spark = (SparkSession.builder.appName("AWS_Spark_Streaming")
         .config('spark.jars.packages',
                 'org.apache.hadoop:hadoop-aws:3.3.1,'
@@ -36,10 +39,12 @@ if __name__ == "__main__":
         .getOrCreate()
     )
 
+    # Directory to raw data with different types
     text_dir = 'file:///home/thangquang/Documents/CODE/aws-spark-streaming-project/data/text'
     csv_dir = 'file:///home/thangquang/Documents/CODE/aws-spark-streaming-project/data/csv'
     json_dir = 'file:///home/thangquang/Documents/CODE/aws-spark-streaming-project/data/json'
 
+    # Define Data Schema For Consistency
     data_schema = StructType([
         StructField("job_title", StringType(), True),
         StructField("salary_start", StringType(), True),
@@ -52,20 +57,27 @@ if __name__ == "__main__":
         StructField("company_address", StringType(), True),
     ])
 
+    # Load all udfs
     udfs = define_udfs()
-
-    text_df = spark.readStream\
-        .format("text")\
-        .option("wholetext", True)\
+    
+    # Read Stream with TEXT FILE
+    text_df = (spark.readStream
+        .format("text")
+        .option("wholetext", True)
         .load(text_dir)
+    )
 
-    json_df = spark.readStream\
+    # Read Stream with JSON FILE
+    json_df = (spark.readStream
         .json(json_dir, schema=data_schema, multiLine=True)
+    )
 
-    csv_df = spark.readStream\
-        .schema(data_schema)\
-        .option("header", "true")\
+    # Read Stream with CSV FILE
+    csv_df = (spark.readStream
+        .schema(data_schema)
+        .option("header", "true")
         .csv(csv_dir)
+    )
 
 
     text_df = text_df.withColumn("job_title", udfs["extract_job_title_udf"]('value'))
@@ -81,34 +93,34 @@ if __name__ == "__main__":
     final_text_df = text_df.select("job_title",
                                     "salary_start",
                                     "salary_end",
-                                    # "years_of_experience",
-                                    # "submission_deadline",
-                                    # "job_description",
-                                    # "job_requirements",
-                                    # "benefits",
-                                    # "company_address",
+                                    "years_of_experience",
+                                    "submission_deadline",
+                                    "job_description",
+                                    "job_requirements",
+                                    "benefits",
+                                    "company_address",
                                 )
 
     final_json_df = json_df.select("job_title",
                                     "salary_start",
                                     "salary_end",
-                                    # "years_of_experience",
-                                    # "submission_deadline",
-                                    # "job_description",
-                                    # "job_requirements",
-                                    # "benefits",
-                                    # "company_address",
+                                    "years_of_experience",
+                                    "submission_deadline",
+                                    "job_description",
+                                    "job_requirements",
+                                    "benefits",
+                                    "company_address",
                                 )
 
     final_csv_df = csv_df.select("job_title",
                                     "salary_start",
                                     "salary_end",
-                                    # "years_of_experience",
-                                    # "submission_deadline",
-                                    # "job_description",
-                                    # "job_requirements",
-                                    # "benefits",
-                                    # "company_address",
+                                    "years_of_experience",
+                                    "submission_deadline",
+                                    "job_description",
+                                    "job_requirements",
+                                    "benefits",
+                                    "company_address",
                                 )
 
     # --------- concatenate all data sources -------------
