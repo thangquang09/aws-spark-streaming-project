@@ -55,11 +55,18 @@ if __name__ == "__main__":
     udfs = define_udfs()
 
     text_df = spark.readStream\
-    .format("text")\
-    .option("wholetext", True)\
-    .load(text_dir)
+        .format("text")\
+        .option("wholetext", True)\
+        .load(text_dir)
 
-    json_df = spark.readStream.json(json_dir, schema=data_schema, multiLine=True)
+    json_df = spark.readStream\
+        .json(json_dir, schema=data_schema, multiLine=True)
+
+    csv_df = spark.readStream\
+        .schema(data_schema)\
+        .option("header", "true")\
+        .csv(csv_dir)
+
 
     text_df = text_df.withColumn("job_title", udfs["extract_job_title_udf"]('value'))
     text_df = text_df.withColumn("salary_start", udfs["extract_salary_start_udf"]('value'))
@@ -93,8 +100,22 @@ if __name__ == "__main__":
                                     # "company_address",
                                 )
 
+    final_csv_df = csv_df.select("job_title",
+                                    "salary_start",
+                                    "salary_end",
+                                    # "years_of_experience",
+                                    # "submission_deadline",
+                                    # "job_description",
+                                    # "job_requirements",
+                                    # "benefits",
+                                    # "company_address",
+                                )
+
+    # --------- concatenate all data sources -------------
+    final_data_stream = final_text_df.union(final_json_df).union(final_csv_df)
+
     query = (
-        final_json_df.writeStream
+        final_data_stream.writeStream
         .outputMode('append')
         .format('console')
         .option('truncate', False)
