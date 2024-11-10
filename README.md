@@ -106,7 +106,7 @@ Additional transformations and cleansing operations can be applied as necessary.
     ```bash
     AWS_ACCESS_KEY_ID=<your-access-key>
     AWS_SECRET_ACCESS_KEY=<your-secret-key>
-    S3_BUCKET_NAME=<your-s3-bucket>
+    S3_BUCKET=<your-s3-bucket>
     ```
 3. Start the Dockerized Spark Cluster: Use Docker Compose to start the Spark master and worker nodes.
     ```bash
