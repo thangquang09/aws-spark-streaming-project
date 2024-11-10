@@ -1,1 +1,1 @@
-docker exec -it aws-spark-streaming-project-spark-worker-2-1 spark-submit --master spark://spark-master:7070 --packages org.apache.hadoop:hadoop-aws:3.3.1,com.amazonaws:aws-java-sdk:1.11.469 jobs/main.py
+docker exec -it aws-spark-streaming-project-spark-master-1 spark-submit --master spark://spark-master:7070 --packages org.apache.hadoop:hadoop-aws:3.3.1,com.amazonaws:aws-java-sdk:1.11.469 jobs/main.py
