@@ -4,8 +4,7 @@ from pyspark.sql.functions import udf
 from functools import reduce
 import os
 
-# from dotenv import load_dotenv
-from config import configuration
+from dotenv import load_dotenv
 
 from udf_utils import *
       
@@ -26,21 +25,21 @@ def define_udfs():
 
 if __name__ == "__main__":
     # load ENVIRONMENT VARIABLES
-    # load_dotenv()
-    AWS_ACCESS_KEY_ID = configuration.AWS_ACCESS_KEY_ID
-    AWS_SECRET_ACCESS_KEY = configuration.AWS_SECRET_ACCESS_KEY
-    print(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
+    load_dotenv()
+    AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+    AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+    S3_BUCKET = os.getenv("S3_BUCKET")
     # create SparkSession and Config
     spark = (SparkSession.builder.appName("AWS_Spark_Streaming_Project")
         .master("spark://spark-master:7077")
         .config('spark.jars.packages',
                 'org.apache.hadoop:hadoop-aws:3.3.1,'
                 'com.amazonaws:aws-java-sdk:1.11.469')
-        # .config('spark.hadoop.fs.s3a.impl', 'org.apache.hadoop.fs.s3a.S3AFileSystem')
-        # .config('spark.hadoop.fs.s3a.access.key', AWS_ACCESS_KEY_ID)
-        # .config('spark.hadoop.fs.s3a.secret.key', AWS_SECRET_ACCESS_KEY)
-        # .config('spark.hadoop.fs.s3a.aws.credentials.provider',
-        #         'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider')
+        .config('spark.hadoop.fs.s3a.impl', 'org.apache.hadoop.fs.s3a.S3AFileSystem')
+        .config('spark.hadoop.fs.s3a.access.key', AWS_ACCESS_KEY_ID)
+        .config('spark.hadoop.fs.s3a.secret.key', AWS_SECRET_ACCESS_KEY)
+        .config('spark.hadoop.fs.s3a.aws.credentials.provider',
+                'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider')
         .getOrCreate()
     )
 
@@ -48,7 +47,6 @@ if __name__ == "__main__":
     text_dir = 'data/text'
     csv_dir = 'data/csv'
     json_dir = 'data/json'
-    output_dir = 'data/output_data'
 
     # Define Data Schema For Consistency
     data_schema = StructType([
@@ -133,9 +131,8 @@ if __name__ == "__main__":
     dfs = [final_text_df, final_json_df, final_csv_df]
     final_data_stream = reduce(lambda df1, df2: df1.union(df2), dfs)
 
-    # final_data_stream = final_text_df.union(final_json_df).union(final_csv_df)
-
-    def streamWriter(input: DataFrame, checkpointFolder, output):
+    # Write Streaming Data
+    def streamWriter(input, checkpointFolder, output):
         return (
             input.writeStream.
             format('parquet')
@@ -145,21 +142,12 @@ if __name__ == "__main__":
             .trigger(processingTime='5 seconds')
             .start()
         )
-    
-    
 
-    # query = (
-    #     final_data_stream.writeStream
-    #     .outputMode('append')
-    #     .format('console')
-    #     # .option("checkpointLocation", "data/output_data/checkpoints")
-    #     # .option("path", output_dir)
-    #     .option("truncate", False)
-    #     .start()
-    # )
-
-    query = streamWriter(final_data_stream, 's3a://aws-spark-streaming-project-bucket/checkpoints/', 
-        's3a://aws-spark-streaming-project-bucket/data/spark_stream')
+    query = streamWriter(
+        input=final_data_stream, 
+        checkpointFolder=f's3a://{S3_BUCKET}/checkpoints/', 
+        output=f's3a://{S3_BUCKET}/data/spark_stream'
+    )
 
     query.awaitTermination()
 

@@ -1,1 +1,1 @@
-docker exec -it aws-spark-streaming-project-spark-master-1 spark-submit   --master spark://spark-master:7077 --conf "spark.executorEnv.PYTHONPATH=/opt/bitnami/spark/jobs" --conf "spark.driver.extraClassPath=/opt/bitnami/spark/jobs"  /opt/bitnami/spark/jobs/main.py
+docker exec -it aws-spark-streaming-project-spark-master-1 spark-submit --packages org.apache.hadoop:hadoop-aws:3.3.1,com.amazonaws:aws-java-sdk:1.11.469,com.fasterxml.jackson.core:jackson-databind:2.15.3 jobs/main.py

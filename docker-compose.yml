@@ -4,12 +4,13 @@ services:
     volumes:
       - ./jobs:/opt/bitnami/spark/jobs
       - ./data:/opt/bitnami/spark/data
-    command: bin/spark-class org.apache.spark.deploy.master.Master
+      - .env:/opt/bitnami/spark/.env
+    command: /bin/bash -c "pip install python-dotenv && bin/spark-class org.apache.spark.deploy.master.Master"
     environment:
       - PYTHONPATH=/opt/bitnami/spark/jobs
     ports:
       - "9090:8080"   # Spark Web UI
-      - "7077:7077"   # Spark RPC port, for workers can connect to
+      - "7077:7077"   # Spark RPC port, for workers to connect
     networks:
       - thangquang
 
@@ -18,7 +19,8 @@ services:
     volumes:
       - ./jobs:/opt/bitnami/spark/jobs
       - ./data:/opt/bitnami/spark/data
-    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+      - .env:/opt/bitnami/spark/.env
+    command: /bin/bash -c "pip install python-dotenv && bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077"
     depends_on:
       - spark-master
     ports:
@@ -37,7 +39,8 @@ services:
     volumes:
       - ./jobs:/opt/bitnami/spark/jobs
       - ./data:/opt/bitnami/spark/data
-    command: bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+      - .env:/opt/bitnami/spark/.env
+    command: /bin/bash -c "pip install python-dotenv && bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077"
     depends_on:
       - spark-master
     ports:
