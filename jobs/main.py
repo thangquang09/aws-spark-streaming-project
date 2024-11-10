@@ -36,13 +36,12 @@ if __name__ == "__main__":
         .config('spark.jars.packages',
                 'org.apache.hadoop:hadoop-aws:3.3.1,'
                 'com.amazonaws:aws-java-sdk:1.11.469')
-        .getOrCreate()
         # .config('spark.hadoop.fs.s3a.impl', 'org.apache.hadoop.fs.s3a.S3AFileSystem')
         # .config('spark.hadoop.fs.s3a.access.key', AWS_ACCESS_KEY_ID)
         # .config('spark.hadoop.fs.s3a.secret.key', AWS_SECRET_ACCESS_KEY)
         # .config('spark.hadoop.fs.s3a.aws.credentials.provider',
         #         'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider')
-        
+        .getOrCreate()
     )
 
     # Directory to raw data with different types
@@ -131,21 +130,37 @@ if __name__ == "__main__":
                                 )
 
     # --------- concatenate all data sources -------------
-    # dfs = [final_text_df, final_json_df, final_csv_df]
-    # final_data_stream = reduce(lambda df1, df2: df1.union(df2), dfs)
+    dfs = [final_text_df, final_json_df, final_csv_df]
+    final_data_stream = reduce(lambda df1, df2: df1.union(df2), dfs)
 
-    final_data_stream = final_text_df.union(final_json_df).union(final_csv_df)
+    # final_data_stream = final_text_df.union(final_json_df).union(final_csv_df)
 
-    query = (
-        final_data_stream.writeStream
-        .outputMode('append')
-        .format('console')
-        # .option("checkpointLocation", "data/output_data/checkpoints")
-        # .option("path", output_dir)
-        .option("truncate", False)
-        .start()
-    )
+    def streamWriter(input: DataFrame, checkpointFolder, output):
+        return (
+            input.writeStream.
+            format('parquet')
+            .option('checkpointLocation', checkpointFolder)
+            .option('path', output)
+            .outputMode('append')
+            .trigger(processingTime='5 seconds')
+            .start()
+        )
+    
+    
+
+    # query = (
+    #     final_data_stream.writeStream
+    #     .outputMode('append')
+    #     .format('console')
+    #     # .option("checkpointLocation", "data/output_data/checkpoints")
+    #     # .option("path", output_dir)
+    #     .option("truncate", False)
+    #     .start()
+    # )
+
+    query = streamWriter(final_data_stream, 's3a://aws-spark-streaming-project-bucket/checkpoints/', 
+        's3a://aws-spark-streaming-project-bucket/data/spark_stream')
 
     query.awaitTermination()
 
-    # spark.stop()
+    spark.stop()

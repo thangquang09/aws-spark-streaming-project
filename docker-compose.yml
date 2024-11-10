@@ -5,6 +5,8 @@ services:
       - ./jobs:/opt/bitnami/spark/jobs
       - ./data:/opt/bitnami/spark/data
     command: bin/spark-class org.apache.spark.deploy.master.Master
+    environment:
+      - PYTHONPATH=/opt/bitnami/spark/jobs
     ports:
       - "9090:8080"   # Spark Web UI
       - "7077:7077"   # Spark RPC port, for workers can connect to
@@ -26,6 +28,7 @@ services:
       - SPARK_WORKER_CORES=2
       - SPARK_WORKER_MEMORY=1g
       - SPARK_MASTER_URL=spark://spark-master:7077
+      - PYTHONPATH=/opt/bitnami/spark/jobs
     networks:
       - thangquang
 
@@ -44,6 +47,7 @@ services:
       - SPARK_WORKER_CORES=2
       - SPARK_WORKER_MEMORY=1g
       - SPARK_MASTER_URL=spark://spark-master:7077
+      - PYTHONPATH=/opt/bitnami/spark/jobs
     networks:
       - thangquang
 
