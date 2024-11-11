@@ -1,5 +1,7 @@
 <h1>AWS SPARK STREAMING PROJECT</h1>
 
+![Background](background.png)
+
 - [1. Project Overview](#1-project-overview)
 - [2. Project](#2-project)
   - [2.1. Multi-format Data Ingestion:](#21-multi-format-data-ingestion)
@@ -13,6 +15,7 @@
 - [6. Getting Started](#6-getting-started)
   - [6.1. Prerequisites](#61-prerequisites)
   - [6.2. Instructions](#62-instructions)
+  - [6.3. Generating Streaming Data](#63-generating-streaming-data)
 
 
 ## 1. Project Overview
@@ -116,4 +119,23 @@ This feature allows for continuous updates to the data lake and real-time insigh
     ```bash
     docker exec -it <spark_master_container> spark-submit --packages org.apache.hadoop:hadoop-aws:3.3.1,com.amazonaws:aws-java-sdk:1.11.469,com.fasterxml.jackson.core:jackson-databind:2.15.3 jobs/main.py
     ```
-    Spark Master Container can be search by this command: `docker ps`.
+    Spark Master Container can be searched using this command: `docker ps`.
+
+### 6.3. Generating Streaming Data
+
+To simulate streaming data ingestion, you can add new files to the `data` directory using the following command:
+
+```bash
+python generator.py -t <file_type> -n <number_of_files_to_load>
+```
+
+- `<file_type>`: Specify the file type (`json`, `csv`, or `txt`) to generate.
+- `<number_of_files_to_load>`: Number of files to generate and load into the folder.
+
+Upon cloning the project, a few dozen files are preloaded and awaiting processing by Spark Streaming. If all preloaded files have been processed and you wish to restart the simulation, follow these steps:
+
+1. **Clear Existing Files**: Delete the processed files in `data/<file_type>` directories under `data/` to reset the input folders.
+   
+2. **Clear Checkpoints and Data on S3**: Remove all checkpoints and output data in the designated S3 bucket. This will clear the state of the stream to allow fresh data processing.
+
+This reset ensures that you can repeatedly test the streaming pipeline without conflicts from previously processed files.
