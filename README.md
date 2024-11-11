@@ -5,7 +5,7 @@
   - [2.1. Multi-format Data Ingestion:](#21-multi-format-data-ingestion)
   - [2.2. Unified Data Schema:](#22-unified-data-schema)
   - [2.3. Data Lake Storage with AWS S3:](#23-data-lake-storage-with-aws-s3)
-  - [2.4. Serverless Data Querying with AWS Glue:](#24-serverless-data-querying-with-aws-glue)
+  - [2.4. Optional Data Cataloging and Querying with AWS Glue and Athena:](#24-optional-data-cataloging-and-querying-with-aws-glue-and-athena)
   - [2.5. Dockerized Spark Cluster:](#25-dockerized-spark-cluster)
   - [2.6. Real-time Processing with Spark Streaming:](#26-real-time-processing-with-spark-streaming)
 - [3. Technology Stack](#3-technology-stack)
@@ -17,7 +17,7 @@
 
 ## 1. Project Overview
 
-This project is designed to build a data pipeline for collecting, processing, and storing job data from various sources and formats. By leveraging the power of Apache Spark for distributed data processing, this pipeline reads job listings in multiple formats (text, JSON, and CSV), unifies the data schema, and loads it into a data lake on AWS S3. To enable efficient querying and analysis of the data lake, we use AWS Glue as a serverless data catalog and query service.
+This project is designed to build a data pipeline for collecting, processing, and storing job data from various sources and formats. By leveraging the power of Apache Spark for distributed data processing, this pipeline reads job listings in multiple formats (text, JSON, and CSV), unifies the data schema, and loads it into a data lake on AWS S3. Using AWS Glue and Athena for ETL and querying is optional but recommended for streamlined data querying and management of the data catalog.
 
 The pipeline is packaged and orchestrated in Docker, creating a simulated Spark cluster environment with a master node and two worker nodes. This setup allows for scalable and efficient processing, closely replicating a production environment.
 
@@ -49,12 +49,11 @@ data_schema = StructType([
 ### 2.3. Data Lake Storage with AWS S3:
 
 The processed data is stored in a data lake on AWS S3, providing a cost-effective, scalable, and durable storage solution for large datasets.
-By using S3 as the data lake, this pipeline can store both raw and processed data, allowing for efficient access and further transformations as required.
+Using S3 as the data lake is mandatory in this project, as it serves as the primary storage for both raw and processed data, allowing efficient access and future transformations.
 
-### 2.4. Serverless Data Querying with AWS Glue:
+### 2.4. Optional Data Cataloging and Querying with AWS Glue and Athena:
 
-AWS Glue is used to catalog the data stored in S3, making it easy to query and analyze using SQL-like syntax with services such as AWS Athena.
-Glue automates schema detection, data cataloging, and provides an easy-to-use interface for transforming and preparing data.
+While not required, it is recommended to use AWS Glue to catalog the data stored in S3 and enable easy querying and analysis with AWS Athena or other SQL-compatible services. Glue can automate schema detection and data cataloging, which is particularly beneficial for ETL tasks and data analysis. Athena, in turn, allows for SQL-based queries on the cataloged data without the need for additional infrastructure setup.
 
 ### 2.5. Dockerized Spark Cluster:
 
@@ -70,7 +69,8 @@ This feature allows for continuous updates to the data lake and real-time insigh
 
 - **Apache Spark:** For distributed data processing and streaming.
 - **AWS S3:** Data lake storage solution, providing scalability and durability.
-- **AWS Glue:** Data catalog and ETL service for schema management and query facilitation.
+- **AWS Glue:** Optional data catalog and ETL service for schema management and query facilitation.
+- **AWS Athena:** Optional serverless query service for SQL-based data analysis.
 - **Docker:** To package the application into containers and simulate a Spark cluster environment with two worker nodes.
 - **Python:** The primary programming language for data processing and pipeline orchestration.
 
@@ -78,12 +78,11 @@ This feature allows for continuous updates to the data lake and real-time insigh
 
 - **Data Ingestion:** Spark reads job data from different sources/formats (text, JSON, CSV) and applies a schema to unify the data structure.
 
-- **Data Processing:** Spark processes and transforms the data according to the specified schema, ensuring consistency across sources.
-Additional transformations and cleansing operations can be applied as necessary.
+- **Data Processing:** Spark processes and transforms the data according to the specified schema, ensuring consistency across sources. Additional transformations and cleansing operations can be applied as necessary.
 
 - **Data Storage:** The processed data is stored in a data lake on AWS S3, creating a centralized repository for all job-related data.
 
-- **Data Querying:** AWS Glue catalogs the data in S3, enabling efficient querying and analysis using AWS Athena or other compatible tools.
+- **Optional Data Querying and Cataloging:** AWS Glue catalogs the data in S3, enabling efficient querying and analysis using AWS Athena or other compatible tools.
 
 - **Real-time Processing:** Spark Streaming enables real-time ingestion and processing, allowing the pipeline to handle continuous data flows and update the data lake in near real-time.
 
@@ -92,14 +91,14 @@ Additional transformations and cleansing operations can be applied as necessary.
 ### 6.1. Prerequisites
 
 - **Docker:** Ensure Docker is installed on your local machine to run the Spark cluster.
-- **AWS Account:** Necessary for setting up S3 and AWS Glue.
+- **AWS Account:** Necessary for setting up S3 and optionally for AWS Glue and Athena.
 
 ### 6.2. Instructions
 
 1. Clone the Repository: Clone the project repository to your local machine.
     ```bash
-    git clone <repository-url>
-    cd <repository-directory>
+    git clone https://github.com/thangquang09/aws-spark-streaming-project
+    cd aws-spark-streaming-project
     ```
 
 2. Set Up .env File: Create a `.env` file in the project root directory to store AWS credentials and other configuration settings.
@@ -115,7 +114,6 @@ Additional transformations and cleansing operations can be applied as necessary.
 
 4. Submit Spark Project: using docker exec to submit main.py
     ```bash
-    docker exec -it aws-spark-streaming-project-spark-master-1 spark-submit --packages org.apache.hadoop:hadoop-aws:3.3.1,com.amazonaws:aws-java-sdk:1.11.469,com.fasterxml.jackson.core:jackson-databind:2.15.3 jobs/main.py
+    docker exec -it <spark_master_container> spark-submit --packages org.apache.hadoop:hadoop-aws:3.3.1,com.amazonaws:aws-java-sdk:1.11.469,com.fasterxml.jackson.core:jackson-databind:2.15.3 jobs/main.py
     ```
-
-
+    Spark Master Container can be search by this command: `docker ps`.

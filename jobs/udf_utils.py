@@ -49,6 +49,8 @@ def extract_submission_deadline(file_content):
     try:
         file_content = file_content.strip()
         deadline = file_content.split("\n")[4].split(": ")[1]
+        if "-" in deadline:
+            deadline = deadline.replace("-", "/")
         deadline = datetime.strptime(deadline, "%d/%m/%Y")
         return deadline
     except Exception as e:
