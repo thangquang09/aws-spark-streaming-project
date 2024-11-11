@@ -7,8 +7,11 @@ import random
 arg = argparse.ArgumentParser()
 arg.add_argument("-t", "--type", required=False,
                  help="Specify the type of file to add (csv, txt, json)")
+arg.add_argument("-n", "--number", required=False,
+                help="Specify the number of file to add")              
 args = vars(arg.parse_args())
-file_type = args.get("type", None)
+file_type = args.get("type")
+number_files = int(args.get("number")) if args.get("number") else 1
 
 directories = {
     "txt": "data/txt",
@@ -45,17 +48,22 @@ try:
     existed_files = [f for f in os.listdir(directories[file_type]) if f.endswith(file_type)]
 
     new_files = [f for f in files if f not in existed_files]
-    print(f"Number of insert new file times: {len(new_files)}")
+    len_files = len(new_files)
+    print(f"Number of insert new file times: {len_files}")
 
-    if len(new_files) <= 0:
+    if len_files <= 0:
         print(f"Out of testing data! Please chose another datatype to test or delete data from S3 bucket and {file_type} folder")
+    elif number_files > len_files:
+        print(f"Not enough files")
     else:
-        random_file = random.choice(new_files)
-        source_path = os.path.join(directories['test'], random_file)
-        destination_path = os.path.join(directories[file_type], random_file)
+        selected_files = random.sample(new_files, int(number_files))
+        for random_file in selected_files:
+            source_path = os.path.join(directories['test'], random_file)
+            destination_path = os.path.join(directories[file_type], random_file)
 
-        shutil.copy(source_path, destination_path)
-        print(f"Copied {random_file} to {directories[file_type]}")
+            shutil.copy(source_path, destination_path)
+            print(f"Copied {random_file} to {directories[file_type]}")
+        print(f"Copied {number_files} files to {directories[file_type]}")
 except Exception as e:
     print(f"Error generating file: {e}")
 finally:
