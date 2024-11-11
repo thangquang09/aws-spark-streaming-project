@@ -11,7 +11,7 @@ args = vars(arg.parse_args())
 file_type = args.get("type", None)
 
 directories = {
-    "txt": "data/text",
+    "txt": "data/txt",
     "csv": "data/csv",
     "json": "data/json",
     "test": "data/testing"

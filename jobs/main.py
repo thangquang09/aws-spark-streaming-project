@@ -44,7 +44,7 @@ if __name__ == "__main__":
     )
 
     # Directory to raw data with different types
-    text_dir = 'data/text'
+    text_dir = 'data/txt'
     csv_dir = 'data/csv'
     json_dir = 'data/json'
 
@@ -68,20 +68,29 @@ if __name__ == "__main__":
     text_df = (spark.readStream
         .format("text")
         .option("wholetext", True)
+        .option("pathGlobFilter", "*.txt")
         .load(text_dir)
     )
 
     # Read Stream with JSON FILE
     json_df = (spark.readStream
-        .json(json_dir, schema=data_schema, multiLine=True)
+        .format("json")
+        .option("pathGlobFilter", "*.json")
+        .schema(data_schema)
+        .option("multiLine", True)
+        .load(json_dir)
     )
+
 
     # Read Stream with CSV FILE
     csv_df = (spark.readStream
+        .format("csv")
+        .option("pathGlobFilter", "*.csv")
         .schema(data_schema)
         .option("header", "true")
-        .csv(csv_dir)
+        .load(csv_dir)
     )
+
 
 
     text_df = text_df.withColumn("job_title", udfs["extract_job_title_udf"]('value'))
