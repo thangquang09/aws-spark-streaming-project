@@ -64,6 +64,7 @@ try:
             shutil.copy(source_path, destination_path)
             print(f"Copied {random_file} to {directories[file_type]}")
         print(f"Copied {number_files} files to {directories[file_type]}")
+    print(f"Number test {file_type} files remain: {min(0,len_files - number_files)}")
 except Exception as e:
     print(f"Error generating file: {e}")
 finally:

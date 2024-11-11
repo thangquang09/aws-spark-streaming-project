@@ -42,8 +42,12 @@ def extract_experience(file_content):
     try:
         pattern = r'Kinh nghiệm:\s*(\d+\s*năm)'
         experience = re.findall(pattern, file_content, re.IGNORECASE)
-
-        return experience[0]
+        if experience:
+            return experience[0]
+        else:
+            file_content = file_content.strip()
+            experience = file_content.split("\n")[3].split(": ")[1]
+            return experience
     except Exception as e:
         raise ValueError(f"Error extracting experience: {e}")
 
