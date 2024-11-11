@@ -12,7 +12,7 @@ def extract_salary_start(file_content):
         salary = re.findall(pattern, file_content, re.IGNORECASE)
         
         if " - " in salary[0]:
-            return salary[0].split(" - ")[0] + " triệu"
+            return str(int(salary[0].split(" - ")[0]) * 1e6)
         elif "thỏa thuận" in salary[0].lower():
             return "Thỏa thuận"
         else:
@@ -27,7 +27,9 @@ def extract_salary_end(file_content):
         salary = re.findall(pattern, file_content, re.IGNORECASE)
         
         if " - " in salary[0]:
-            return salary[0].split(" - ")[1]
+            tmp = salary[0].split(" - ")[1]
+            number = re.findall(r'\d+', tmp)[0]
+            return str(int(number) * 1e6)
         elif "thỏa thuận" in salary[0].lower():
             return "Thỏa thuận"
         else:

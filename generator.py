@@ -1,4 +1,7 @@
 import argparse
+import os
+import shutil
+import random
 
 
 arg = argparse.ArgumentParser()
@@ -7,9 +10,12 @@ arg.add_argument("-t", "--type", required=False,
 args = vars(arg.parse_args())
 file_type = args.get("type", 20)
 
-text_dir = "data/text"
-csv_dir = "data/csv"
-json_dir = "data/json"
+directories = {
+    "txt": "data/text",
+    "csv": "data/csv",
+    "json": "data/json",
+    "test": "data/testing"
+}
 
 if not file_type:
     print("No file type selected!")
@@ -34,4 +40,18 @@ if not file_type:
 
 print(f"File type selected: {file_type}")
 
+files = [f for f in os.listdir(directories['test']) if f.endswith(file_type)]
+existed_files = [f for f in os.listdir(directories[file_type]) if f.endswith(file_type)]
 
+new_files = [f for f in files if f not in existed_files]
+print(f"Number of insert new file times: {len(new_files)}")
+
+if len(new_files) <= 0:
+    print(f"Out of testing data! Please chose another datatype to test or delete data from S3 bucket and {file_type} folder")
+else:
+    random_file = random.choice(new_files)
+    source_path = os.path.join(directories['test'], random_file)
+    destination_path = os.path.join(directories[file_type], random_file)
+
+    shutil.copy(source_path, destination_path)
+    print(f"Copied {random_file} to {directories[file_type]}")
